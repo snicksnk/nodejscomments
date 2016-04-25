@@ -4,6 +4,10 @@ var passport = require('passport');
 
 var User = require('../model/user.js');
 
+var response = require('../response.js');
+
+var auth = require('../auth.js');
+
 
 router.post('/', function(req, res){
 
@@ -35,8 +39,8 @@ router.post('/', function(req, res){
 router.get('/', function(req, res){
 
 
-  res.send({
-      data: {
+    res.send({
+        data: {
             users: [
                 {
                     id: 1,
@@ -49,17 +53,25 @@ router.get('/', function(req, res){
                     total_comments: 1
                 }
             ]
-      }
-  });
-
-
-});
-
-router.post('/session/', function(req, res){
-	res.send({
-        status: "success" 
+        }
     });
+
+
 });
+
+router.post('/session/', 
+    function(req, res){
+     
+        auth.authenticate(req.body.username, req.body.password).then(
+            token => {
+                response.success(res)({token: token})
+            }
+        )
+        .catch(response.error(res)); 
+
+    }
+);
+
 
 
 

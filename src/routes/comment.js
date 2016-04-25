@@ -3,7 +3,10 @@ var router = express.Router();
 var passport = require('passport');
 
 
-router.post('/', function(req, res){
+var auth = require('../auth.js');
+
+
+router.post('/', auth.isAuthenticated, function(req, res){
 	res.send({
         status: "success",
         data: {

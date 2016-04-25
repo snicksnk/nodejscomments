@@ -13,8 +13,20 @@ var UserSchema = new mongoose.Schema({
   	password: {
     	type: String,
     	required: true
+  	},
+  	apiKey: {
+  		type: String,
+  		required: true
   	}
 });
+
+UserSchema.methods.verifyPassword = function(password, cb) {
+	bcrypt.compare(password, this.password, function(err, isMatch) {
+		if (err) return cb(err);
+		cb(null, isMatch);
+	});
+};
+
 
 
 UserSchema.pre('save', function(callback) {
