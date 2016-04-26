@@ -14,9 +14,9 @@ var UserSchema = new mongoose.Schema({
     	type: String,
     	required: true
   	},
-  	apiKey: {
-  		type: String,
-  		required: true
+  	numOfComments: {
+  		type: Number,
+  		default: 0
   	}
 });
 
@@ -26,6 +26,14 @@ UserSchema.methods.verifyPassword = function(password, cb) {
 		cb(null, isMatch);
 	});
 };
+
+UserSchema.methods.toJson = function(){
+	return {
+		_id: this._id,
+		username: this.username
+	};
+
+}
 
 
 

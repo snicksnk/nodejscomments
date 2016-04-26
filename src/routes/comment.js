@@ -1,69 +1,123 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
-
-
+var response = require('../response.js');
 var auth = require('../auth.js');
 
 
+var Comment = require('../model/comment.js');
+
+
 router.post('/', auth.isAuthenticated, function(req, res){
-	res.send({
-        status: "success",
-        data: {
-            id: 22
-        }
+
+    var text = req.body.text;
+    var pid = req.body.pid;
+
+    if (!pid){
+        var comment = new Comment({
+            text: text,
+            path: [],
+            _author: req.userId
+        });
+        comment.save(err => {   
+            if (err){
+                response.error(res)(err);
+            } else {
+                response.success(res)({comment});
+            };
+        });
+    } else {
+        Comment.findOne({
+            '_id': pid
+        }, function (err, parentComment) {
+            if (err){
+                response.error(res)(err);
+            }
+
+            if (parentComment){
+
+                var newPath = parentComment.path;
+
+                newPath.push(parentComment._id.toString());
+                var comment = new Comment({
+                    text: text,
+                    path: newPath,
+                    _author: req.userId
+                });
+
+                comment.save(err => {
+                    if (err){
+                        response.error(res)(err);
+                    } else {
+                        response.success(res)({comment});
+                    }
+                });
+
+            } else {
+                response.error(res)(response.pubError('Undefined parent comment'));
+            }
+
+        });
+    }
+
+    
+
+    /*
+    var user = new Comment({
+        username: req.body.text,
+        pid: req.body.pid
     });
+
+    user.save(function(err){
+        if(err){
+            response.success(res)(err);
+        }
+        response.success(res)(user);
+    });*/
 });
 
 
-router.get('/', function(req, res){
-    res.send({
-        data: [
-            {
-                id: 1,
-                text: 'hello',
-                user: {
-                    id: 1,
-                    username: 'vasya'
-                },
-                sub: [
-                    {
-                        id: 2,
-                        text: 'bue',
-                        user: {
-                            id: 2,
-                            username: 'petya'
-                        }
-                    },
-                    {
-                        id: 3,
-                        text: 'hello!',
-                        user: {
-                            id: 3,
-                            username: 'fedor'
-                        }
-                    }
-                ]
-            },
-            {
-                id: 4,
-                text: 'azaza',
-                user: {
-                    id: 3,
-                    username: 'fedor'
-                },
-                sub: []
+router.get('/', function(req, res) {
+
+    Comment
+        .find()
+        .populate('_author')
+        .exec(function (err, comments){
+            if (err){
+                response.error(req)(err);
             }
-        ]
-    });
+           
+            var preparedData = comments.map(element => {
+                element._author = element._author.toJson();
+                return element;
+            });
+
+            response.success(res)(preparedData);
+        });
+
 });
 
 router.get('/max-depth', function(req, res){
-	res.send({
-        data: {
-            max_depth: 100500
+    Comment.aggregate(
+    {
+        $project: {
+            dep: {$size: "$path"}
+        }
+    }, 
+    {
+        $sort: {dep: -1}
+    }, 
+    {
+        $limit: 1
+    }, function (err, result) {
+        if (err) {
+            response.error(res)(err);
+        } else {
+            response.success(res)({max_depth: result[0].dep});
         }
     });
+
+
 });
 
 

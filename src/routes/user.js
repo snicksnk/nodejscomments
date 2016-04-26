@@ -1,62 +1,29 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
-
 var User = require('../model/user.js');
-
 var response = require('../response.js');
-
 var auth = require('../auth.js');
 
 
 router.post('/', function(req, res){
-
-
-  res.send({
-      status : "success",
-  });
-
-/*
-	console.log('user');
-
 	var user = new User({
     	username: req.body.username,
     	password: req.body.password
   	});
 
   	user.save(function(err){
-  		console.log('err 2 1 11', err);
   		if(err){
-  			res.send(err);
+            response.success(res)(err);
   		}
-  		res.json(user);
+  		response.success(res)(user);
   	});
-
-  	console.log('savee');
-*/
 });
 
 router.get('/', function(req, res){
-
-
-    res.send({
-        data: {
-            users: [
-                {
-                    id: 1,
-                    username: 'Vasya',
-                    total_comments: 23
-                },
-                {
-                    id: 2,
-                    username: 'Petya',
-                    total_comments: 1
-                }
-            ]
-        }
+    User.find({}, function(err, users){
+        
     });
-
-
 });
 
 router.post('/session/', 
@@ -64,10 +31,13 @@ router.post('/session/',
      
         auth.authenticate(req.body.username, req.body.password).then(
             token => {
-                response.success(res)({token: token})
+                response.success(res)({token: token});
             }
         )
-        .catch(response.error(res)); 
+        .catch(err => {
+            res.statusCode = 401;
+            response.error(res)(response.pubError('Auth error'));
+        }); 
 
     }
 );

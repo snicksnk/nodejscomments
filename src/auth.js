@@ -15,9 +15,14 @@ function isAuthenticated(req, res, next){
 			req.userId = decodedId;
 			next()
 		})
-		.catch(response.error(res))
+		.catch(err => {
+			res.statusCode = 401;
+			response.error(res);
+		})
 	} else {
-		response.error(res)(new Error('No token'));
+		console.log('no token'); 	
+		res.statusCode = 401;
+		response.error(res)(response.pubError('No token'));
 	}
 }
 

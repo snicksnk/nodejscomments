@@ -1,10 +1,17 @@
+"use sctrict";
+
+
+
 module.exports = {
 	error(response){
 		return (error) => 
+		{
+			var errorText = error.pubMessage?error.pubMessage:error.message;
 			response.send({
 				status: "fail",
-				error: error.message
+				error: errorText
 			});
+		}
 	},
 	success(response){
 		return (data) => 
@@ -12,5 +19,8 @@ module.exports = {
 				status: "success",
 				data: data
 			});
+	},
+	pubError(error){
+		return {pubMessage: error};		
 	}
 };
