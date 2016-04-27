@@ -14,9 +14,10 @@ router.post('/', function(req, res){
 
   	user.save(function(err){
   		if(err){
-            response.success(res)(err);
-  		}
-  		response.success(res)(user);
+            response.error(res)(response.pubError("Registration error"));
+  		} else {
+            response.success(res)(user);   
+        }
   	});
 });
 

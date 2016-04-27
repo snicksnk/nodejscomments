@@ -29,7 +29,7 @@ app.use('/api/v1/comment', commentsRoutes);
 
 
 app.listen(port, function () {
-	console.log('Start on ' + port);
+	console.log('Start "' + (process.env.NODE_ENV || "production") + '" on ' + port);
 });
 
 module.exports = app;

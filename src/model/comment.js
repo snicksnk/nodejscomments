@@ -27,7 +27,6 @@ CommentSchema.pre('save', function(callback) {
 	var comment = this;
 	var userId = this._author;
 	User.findOne({_id: userId}, function(err, user) {
-		console.log('--------', err, user);
 		user.numOfComments ++;
 		user.save(err => {
 			callback();

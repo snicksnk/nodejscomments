@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js",
+    "start": "export NODE_ENV=\"production\" && nodemon app.js",
+    "dev": "export NODE_ENV=\"development\" && nodemon app.js",
     "test": "istanbul cover _mocha tests/spec.js"
   },
   "author": "",
