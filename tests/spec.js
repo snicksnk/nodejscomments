@@ -1,8 +1,6 @@
 var request = require('supertest');
 var assert = require('chai').assert;
 var chai = require("chai");
-chai.should();
-chai.use(require('chai-things'));
 
 var app = require('../app');
 var mongoose = require('mongoose');
@@ -16,6 +14,11 @@ var id = 0;
 var user = {
     username: 'test',
     password: 'test'
+};
+
+var secondUser = {
+    username: 'test2',
+    password: 'test'    
 };
 
 var wrongPasswordUser = {
@@ -83,6 +86,22 @@ describe('Testing REST API', function () {
                 done(err);
             });
     });
+
+
+    it('Create second user', function (done) {
+        request(app)
+            .post('/api/v1/user')
+            .type('form')
+            .expect("Content-type",/json/)
+            .expect(200) // THis is HTTP response
+            .send(secondUser)
+            .end((err, res) => {
+                assert.equal(res.body.status, 'success');
+                assert.typeOf(res.body.data._id, 'string');
+                done(err);
+            });
+    });
+
 
 
     it('Create user again', function (done) {
@@ -237,6 +256,7 @@ describe('Testing REST API', function () {
                 });
         });
 
+        var childChildCommentId;
         it('Create child of child comment', function(done){
             request(app)
                 .post('/api/v1/comment')
@@ -251,13 +271,15 @@ describe('Testing REST API', function () {
                 .end((err, res) => {
                     assert.equal(res.body.status, 'success');
                     
-                    assert.typeOf(res.body.data.comment._id, 'string');
+                    childChildCommentId  = res.body.data.comment._id;
+                    assert.typeOf(childChildCommentId, 'string');
                     assert.deepEqual(res.body.data.comment.path,  [parentCommentId, childParentCommentId])
 
                     done(err);
                 });
         });
 
+        var newRootCommentId;
         it('Create new root comment', function(done){
             request(app)
                 .post('/api/v1/comment')
@@ -271,7 +293,8 @@ describe('Testing REST API', function () {
                 })
                 .end((err, res) => {
                     assert.equal(res.body.status, 'success');
-                    assert.typeOf(res.body.data.comment._id, 'string');
+                    newRootCommentId = res.body.data.comment._id;
+                    assert.typeOf(newRootCommentId, 'string');
                     assert.deepEqual(res.body.data.comment.path,  [])
 
                     done(err);
@@ -286,12 +309,24 @@ describe('Testing REST API', function () {
                 .expect(200)
                 .end((err, res) => {
                     assert.equal(res.body.status, 'success');
-                    assert.equal(res.body.data.length, 4);
-                    res.body.data.should.contain.a.thing.with.property('_id', parentCommentId);
-                    res.body.data.should.contain.a.thing.with.property('_id', childParentCommentId);
+                    assert.equal(res.body.data.length, 2);
+                  
+                    assert.equal(res.body.data[0]['_id'], parentCommentId);
+                    assert.equal(res.body.data[0]['childrens'][0
+                        ]['_id'], childParentCommentId);
+                     assert.equal(res.body.data[0]['childrens'][0
+                        ]['childrens'][0
+                        ]['_id'], childChildCommentId);
+                    assert.equal(res.body.data[1]['_id'], newRootCommentId);
+                  
                     done(err);
+
+
+
+
                 });
         });
+
 
 
         it('Get comments max-depth', function(done){
@@ -302,6 +337,19 @@ describe('Testing REST API', function () {
                 .end((err, res) => {
                     assert.equal(res.body.status, 'success');
                     assert.equal(res.body.data.max_depth, 2);
+                    done(err);
+                });
+        });
+
+
+        it('Get users', function(done){
+            request(app)
+                .get('/api/v1/user')
+                .expect("Content-type",/json/)
+                .expect(200)
+                .end((err, res) => {
+                    assert.equal(res.body.status, 'success');
+                
                     done(err);
                 });
         });

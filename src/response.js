@@ -27,7 +27,8 @@ module.exports = {
 				data: data
 			});
 	},
-	pubError(error){
-		return {pubMessage: error};		
+	pubError(error, originalError){
+		return {pubMessage: error, originalError: originalError};		
 	}
 };
+

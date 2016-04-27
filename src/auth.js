@@ -8,7 +8,6 @@ var salt = "secreettt3213dasdkasjdakj";
 
 function isAuthenticated(req, res, next){
 	var token = req.body.token || req.query.token || req.headers['x-access-token'];
-	console.log()
 	if (token) {
 		verify(token)
 		.then((decodedId) => {
@@ -17,12 +16,11 @@ function isAuthenticated(req, res, next){
 		})
 		.catch(err => {
 			res.statusCode = 401;
-			response.error(res);
+			response.error(res)(response.pubError('Wrong token'), 401);
 		})
 	} else {
-		console.log('no token'); 	
 		res.statusCode = 401;
-		response.error(res)(response.pubError('No token'));
+		response.error(res)(response.pubError('No token'), 401);
 	}
 }
 
@@ -68,9 +66,7 @@ function verify(token) {
 		jwt.verify(token, salt, function(err, decoded) {
 			if (err){
 				reject(err);
-				console.log('errr', err)
 			} else {
-				console.log('dec', decoded)
 				resolve(decoded);	
 			}
 		});
