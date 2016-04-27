@@ -430,8 +430,12 @@ describe('Testing REST API', function () {
                 .end((err, res) => {
                     assert.equal(res.body.status, 'success');
                     assert.equal(res.body.data.users[0]['username'], user['username']);
+                    assert.equal(res.body.data.users[0]['numOfComments'], 3);
                     assert.equal(res.body.data.users[1]['username'], secondUser['username']);
+                    assert.equal(res.body.data.users[1]['numOfComments'], 1);
+
                     assert.equal(res.body.data.users[2]['username'], thirdUser['username']);
+                    assert.equal(res.body.data.users[2]['numOfComments'], 0);
                     done(err);
                 });
         });
