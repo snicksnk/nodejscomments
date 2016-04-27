@@ -20,20 +20,22 @@ var UserSchema = new mongoose.Schema({
   	}
 });
 
-UserSchema.methods.verifyPassword = function(password, cb) {
+UserSchema.methods.verifyPassword = function(password, callback) {
 	bcrypt.compare(password, this.password, function(err, isMatch) {
-		if (err) return cb(err);
-		cb(null, isMatch);
+		if (err){ 
+			return callback(err);
+		}
+		callback(null, isMatch);
 	});
 };
 
 UserSchema.methods.toJson = function(){
 	return {
 		_id: this._id,
-		username: this.username
+		username: this.username,
+		numOfComments: this.numOfComments
 	};
-
-}
+};
 
 
 

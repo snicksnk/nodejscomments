@@ -12,13 +12,13 @@ module.exports = {
 				errorText = error.pubMessage?error.pubMessage:'';
 			}
 
-			response.status = status
+			response.status = status;
 			response.send({
 				status: "fail",
 				error: errorText,
 				err: err
 			});
-		}
+		};
 	},
 	success(response){
 		return (data) => 

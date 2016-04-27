@@ -1,34 +1,30 @@
 {
-  "name": "rest",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "start": "export NODE_ENV=\"production\" && nodemon app.js",
-    "dev": "export NODE_ENV=\"development\" && nodemon app.js",
-    "test": "istanbul cover _mocha tests/spec.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "engines": {
-    "node": "5.11.0"
-  },
-  "dependencies": {
-    "bcrypt-nodejs": "0.0.3",
-    "body-parser": "^1.15.0",
-    "express": "^4.13.4",
-    "jsonwebtoken": "^5.7.0",
-    "mongoose": "^4.4.13",
-    "morgan": "^1.7.0",
-    "passport": "^0.3.2",
-    "passport-local": "^1.0.0"
-  },
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "chai-things": "^0.2.0",
-    "istanbul": "^0.4.3",
-    "mocha": "^2.4.5",
-    "should": "^8.3.1",
-    "supertest": "^1.2.0"
-  }
+    "name": "rest",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "scripts": {
+        "start": "export NODE_ENV=\"production\" && nodemon app.js",
+        "dev": "export NODE_ENV=\"development\" && nodemon app.js",
+        "test": "export NODE_ENV=\"production\" && istanbul cover _mocha tests/spec.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "engines": {
+        "node": "5.11.0"
+    },
+    "dependencies": {
+        "bcrypt-nodejs": "0.0.3",
+        "body-parser": "^1.15.0",
+        "express": "^4.13.4",
+        "jsonwebtoken": "^5.7.0",
+        "mongoose": "^4.4.13",
+        "morgan": "^1.7.0"
+    },
+    "devDependencies": {
+        "chai": "^3.5.0",
+        "istanbul": "^0.4.3",
+        "mocha": "^2.4.5",
+        "supertest": "^1.2.0"
+    }
 }

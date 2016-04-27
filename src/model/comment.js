@@ -33,14 +33,12 @@ CommentSchema.pre('save', function(callback) {
 	User.findOne({_id: userId}, function(err, user) {
 
 		if (err){
-
 			return callback(err);
-			throw 'No user! ' + err;
 		} else if (user) {
 			user.numOfComments ++;
 			user.save(err => {
 				return callback(err);
-			})
+			});
 		} else {
 			return callback(new Error('No user'));
 		}

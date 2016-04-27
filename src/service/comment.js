@@ -155,4 +155,4 @@ class CommentService extends MongooseService {
 }
 
 
-module.exports = new CommentService;
+module.exports = new CommentService();

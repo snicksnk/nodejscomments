@@ -1,24 +1,20 @@
 var express = require('express');
 var router = express.Router();
-var passport = require('passport');
 var response = require('../response.js');
 var auth = require('../auth.js');
-
-
 var Comment = require('../model/comment.js');
-
 var CommentService = require('../service/comment.js');
 
 router.post('/', auth.isAuthenticated, function(req, res){
 
     var text = req.body.text;
     var pid = req.body.pid;
-
+    var authorId = req.userId;
 
     CommentService.create({
         text,
         pid,
-        authorId: req.userId
+        authorId
     })
     .then(comment => {
         response.success(res)({comment});

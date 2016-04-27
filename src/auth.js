@@ -1,9 +1,23 @@
-var User = require('./model/user');
+"use strict";
 var jwt    = require('jsonwebtoken');
 var response = require('./response.js');
+var session = require('./service/session.js');
 
 
-var salt = "secreettt3213dasdkasjdakj";
+var config = require('../config/config.js');
+
+var salt = config.salt;
+
+
+
+function verify(token){
+	return session.verify(token, salt);
+}
+
+
+function authenticate(username, pasword){
+	return session.authenticate(username, pasword, salt);
+}
 
 
 function isAuthenticated(req, res, next){
@@ -12,12 +26,12 @@ function isAuthenticated(req, res, next){
 		verify(token)
 		.then((decodedId) => {
 			req.userId = decodedId;
-			next()
+			next();
 		})
 		.catch(err => {
 			res.statusCode = 401;
 			response.error(res)(response.pubError('Wrong token'), 401);
-		})
+		});
 	} else {
 		res.statusCode = 401;
 		response.error(res)(response.pubError('No token'), 401);
@@ -25,57 +39,7 @@ function isAuthenticated(req, res, next){
 }
 
 
-function authenticate(username, password){
-
-	return new Promise((resolve, reject) => {
-
-        User.findOne({username: username}, function(err, user){
-
-            if (err) {  
-            	reject(err);
-            }
-
-            if (!user) {
-            	reject(Error('Usern not found'));
-            	return;
-            }
-
-
-            user.verifyPassword(password, function(err, isMatch) {
-                
-                if (err) {  
-                	reject(err);
-                }
-
-                if (!isMatch) { 
-                    status = 'not match'
-                    reject(Error('Password don\'t match'));
-                } else {
-                	var userId = user._id.toString();
-                	var token = jwt.sign(userId, salt);
-                	resolve(token);
-                }
-            });
-        });
-
-    });    
-}
-
-function verify(token) {
-	return new Promise((resolve, reject) => {
-		jwt.verify(token, salt, function(err, decoded) {
-			if (err){
-				reject(err);
-			} else {
-				resolve(decoded);	
-			}
-		});
-	});
-}
-
-
 module.exports = {
 	isAuthenticated: isAuthenticated,
 	authenticate: authenticate,
-	verify: verify
-}
+};

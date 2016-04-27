@@ -5,6 +5,7 @@ var chai = require("chai");
 var app = require('../app');
 var mongoose = require('mongoose');
 
+var config = require('../config/config.js');
 
 
 
@@ -19,6 +20,11 @@ var user = {
 var secondUser = {
     username: 'test2',
     password: 'test'    
+};
+
+var thirdUser = {
+    username: 'test3',
+    password: 'test' 
 };
 
 var wrongPasswordUser = {
@@ -47,7 +53,7 @@ describe('Testing REST API', function () {
 
         if (mongoose.connection.readyState === 0) {
             //TODO fix it
-            mongoose.connect('mongodb://localhost:27017/comments', function (err) {
+            mongoose.connect(config.db, function (err) {
                 if (err) {
                     throw err;
                 }
@@ -82,7 +88,7 @@ describe('Testing REST API', function () {
             .send(user)
             .end((err, res) => {
                 assert.equal(res.body.status, 'success');
-                assert.typeOf(res.body.data._id, 'string');
+                assert.typeOf(res.body.data.user._id, 'string');
                 done(err);
             });
     });
@@ -97,7 +103,21 @@ describe('Testing REST API', function () {
             .send(secondUser)
             .end((err, res) => {
                 assert.equal(res.body.status, 'success');
-                assert.typeOf(res.body.data._id, 'string');
+                assert.typeOf(res.body.data.user._id, 'string');
+                done(err);
+            });
+    });
+
+    it('Create third user', function (done) {
+        request(app)
+            .post('/api/v1/user')
+            .type('form')
+            .expect("Content-type",/json/)
+            .expect(200) // THis is HTTP response
+            .send(thirdUser)
+            .end((err, res) => {
+                assert.equal(res.body.status, 'success');
+                assert.typeOf(res.body.data.user._id, 'string');
                 done(err);
             });
     });
@@ -109,7 +129,7 @@ describe('Testing REST API', function () {
             .post('/api/v1/user')
             .type('form')
             .expect("Content-type",/json/)
-            .expect(200) // THis is HTTP response
+            .expect(200) 
             .send(user)
             .end((err, res) => {
                 assert.equal(res.body.status, 'fail');
@@ -118,19 +138,6 @@ describe('Testing REST API', function () {
             });
     });
 
-  // it('GET /api/v1/user ', function (done) {
-  //   request(app)
-  //     .get('/api/v1/user')
-  //     .set('Accept','application/json')
-  //     .expect('Content-Type', /json/)
-  //     .expect(200)
-  //     .end(function (err, res) {
-      
-  //       done();
-  //     });
-  // });
-  // 
-  // 
 
     it('Login with wrong password', function(done){
         
@@ -192,6 +199,9 @@ describe('Testing REST API', function () {
 
     describe("Users area", function() {
         var token;
+        var token2;
+        var token3;
+
         it('Login ', function(done){
             request(app)
                 .post('/api/v1/user/session')
@@ -205,6 +215,38 @@ describe('Testing REST API', function () {
                     token = res.body.data.token;
                     assert.typeOf(token, 'string');
 
+                    done(err);
+                });
+        });
+
+        it('Login 2', function(done){
+            request(app)
+                .post('/api/v1/user/session')
+                .type('form')
+                .expect("Content-type",/json/)
+                .expect(200)
+                .send(secondUser)
+                .end((err, res) => {
+                    assert.equal(res.body.status, 'success');
+
+                    token2 = res.body.data.token;
+                    assert.typeOf(token, 'string');
+
+                    done(err);
+                });
+        });
+
+        it('Login 3', function(done){
+            request(app)
+                .post('/api/v1/user/session')
+                .type('form')
+                .expect("Content-type",/json/)
+                .expect(200)
+                .send(secondUser)
+                .end((err, res) => {
+                    assert.equal(res.body.status, 'success');
+                    token3 = res.body.data.token;
+                    assert.typeOf(token, 'string');
                     done(err);
                 });
         });
@@ -232,6 +274,37 @@ describe('Testing REST API', function () {
                 });
         });
 
+        it('Get comments max-depth after first comment', function(done){
+            request(app)
+                .get('/api/v1/comment/max-depth')
+                .expect("Content-type",/json/)
+                .expect(200)
+                .end((err, res) => {
+                    assert.equal(res.body.status, 'success');
+                    assert.equal(res.body.data.max_depth, 0);
+                    done(err);
+                });
+        });
+
+        it('Create comment with wrong token', function(done){
+            request(app)
+                .post('/api/v1/comment')
+                .type('form')
+                .expect("Content-type",/json/)
+                .expect(401)
+                .send({
+                    text: 'response to you',
+                    pid: parentCommentId,
+                    token: 'aasassassd22'
+                })
+                .end((err, res) => {
+                    assert.equal(res.body.status, 'fail');
+                    done(err);
+                });
+        });
+
+
+
         var childParentCommentId;
         it('Create child comment', function(done){
             request(app)
@@ -242,7 +315,7 @@ describe('Testing REST API', function () {
                 .send({
                     text: 'response to you',
                     pid: parentCommentId,
-                    token: token
+                    token: token2
                 })
                 .end((err, res) => {
                     assert.equal(res.body.status, 'success');
@@ -250,8 +323,21 @@ describe('Testing REST API', function () {
                     childParentCommentId = res.body.data.comment._id;
 
                     assert.typeOf(childParentCommentId, 'string');
-                    assert.deepEqual(res.body.data.comment.path,  [parentCommentId])
+                    assert.deepEqual(res.body.data.comment.path,  [parentCommentId]);
 
+                    done(err);
+                });
+        });
+
+
+        it('Get comments max-depth after first child comment', function(done){
+            request(app)
+                .get('/api/v1/comment/max-depth')
+                .expect("Content-type",/json/)
+                .expect(200)
+                .end((err, res) => {
+                    assert.equal(res.body.status, 'success');
+                    assert.equal(res.body.data.max_depth, 1);
                     done(err);
                 });
         });
@@ -295,8 +381,7 @@ describe('Testing REST API', function () {
                     assert.equal(res.body.status, 'success');
                     newRootCommentId = res.body.data.comment._id;
                     assert.typeOf(newRootCommentId, 'string');
-                    assert.deepEqual(res.body.data.comment.path,  [])
-
+                    assert.deepEqual(res.body.data.comment.path,  []);
                     done(err);
                 });
         });
@@ -318,12 +403,7 @@ describe('Testing REST API', function () {
                         ]['childrens'][0
                         ]['_id'], childChildCommentId);
                     assert.equal(res.body.data[1]['_id'], newRootCommentId);
-                  
                     done(err);
-
-
-
-
                 });
         });
 
@@ -349,7 +429,9 @@ describe('Testing REST API', function () {
                 .expect(200)
                 .end((err, res) => {
                     assert.equal(res.body.status, 'success');
-                
+                    assert.equal(res.body.data.users[0]['username'], user['username']);
+                    assert.equal(res.body.data.users[1]['username'], secondUser['username']);
+                    assert.equal(res.body.data.users[2]['username'], thirdUser['username']);
                     done(err);
                 });
         });
